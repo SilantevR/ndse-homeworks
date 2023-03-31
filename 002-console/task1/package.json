@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "bin": {
-    "current": "./index.js",
-    "add": "./add.js",
-    "sub": "./sub.js"
+    "date": "./index.js"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
