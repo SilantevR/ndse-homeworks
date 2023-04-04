@@ -1,0 +1,10 @@
+<%- include("../layouts/start", {title: title})%> <%-
+include("../layouts/menu")%>
+
+<h1><%= title %></h1>
+
+<div class="row">
+  <div class="col-sm-6"><%- include('../layouts/form'), {book: book}%></div>
+</div>
+
+<%- include("../layouts/end")%>
