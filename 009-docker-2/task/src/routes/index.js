@@ -1,13 +1,14 @@
 const { v4: uuid } = require("uuid");
 const express = require("express");
 const path = require("path");
+const http = require("http");
 const fileMulter = require("../middlewares/books");
 const coverMulter = require("../middlewares/covers");
 const router = express.Router();
 
 class Book {
   constructor(body) {
-    this.id = uuid();
+    this.id = body.id || uuid();
     this.title = body.title || "";
     this.description = body.description || "";
     this.authors = body.authors || "";
@@ -20,17 +21,38 @@ class Book {
 const store = {
   books: [
     new Book({
+      id: "1214315hjkhk21351",
       title: "Убийство",
       description: "Детектив",
       authors: "Kein",
       favorite: true,
       fileName: "не загружено",
     }),
-    new Book({}),
+    new Book({
+      id: "1214315hjkhk21352",
+      title: "Приключение",
+      description: "Детектив",
+      authors: "Kein",
+      favorite: true,
+      fileName: "не загружено",
+    }),
   ],
 };
 
-const err404 = { error: 404, reason: "Страница не найдена" };
+function httpGet (URL){
+  return new Promise ((resolve, reject) => {
+  http.get(URL, (res) => {
+    let rowData = "";
+    res.setEncoding("utf8");
+    res.on("data", (chunk) => (rowData += chunk));
+    res.on("end", () => {
+    resolve(JSON.parse(rowData));
+    }).on("error", (err) => {
+      reject(err)
+    });
+  })
+  })
+}
 
 router.get("/", (req, res) => {
   const { books } = store;
@@ -44,20 +66,48 @@ router.get("/add", (req, res) => {
   });
 });
 
-router.get("/:id", (req, res) => {
+router.get("/:id", async(req, res) => {
   const { id } = req.params;
+  const URL = `http://counter:4000/${id}`;
+  let obj = await httpGet(URL)
   const { books } = store;
   const index = books.findIndex((el) => el.id === id);
   if (index !== -1) {
     res.render("./pages/view", {
       title: books[index].title,
       book: books[index],
+      count: obj.count,
     });
   } else {
     res.render("./pages/404", {
       title: "Ошибка 404",
     });
   }
+});
+
+router.post("/counter/:id/incr", (req, res) => {
+  const { id } = req.params;
+  const postOptions = {
+    hostname: 'counter',
+    port    : '4000',
+    path    : `/${id}`,
+    method  : 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+   },
+};
+  
+    const postRequest = http.request(postOptions, (response) => {
+      response.setEncoding('utf8');
+    })
+
+    postRequest.on("error", (err) => {
+      console.log(err)
+    });
+   
+    postRequest.end();
+    res.redirect(301, "http://localhost:3000" + `/${id}`);
+  
 });
 
 router.post("/add", (req, res) => {
@@ -84,7 +134,7 @@ router.get("/update/:id", (req, res) => {
   }
 });
 
-router.post("/file/:id", fileMulter.single("fileBook"), (req, res) => {
+router.post("/file/:id", fileMulter.single("fileBook"), async(req, res) => {
   const { id } = req.params;
   const index = store.books.findIndex((el) => el.id === id);
   if (index !== -1 && req.file) {
@@ -93,9 +143,12 @@ router.post("/file/:id", fileMulter.single("fileBook"), (req, res) => {
       ...store.books[index],
       fileName: filename,
     };
+    const URL = `http://counter:4000/${id}`;
+    const obj = await httpGet(URL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],
+      count: obj.count
     });
   } else {
     res.render("./pages/404", {
@@ -104,7 +157,7 @@ router.post("/file/:id", fileMulter.single("fileBook"), (req, res) => {
   }
 });
 
-router.post("/cover/:id", coverMulter.single("fileCover"), (req, res) => {
+router.post("/cover/:id", coverMulter.single("fileCover"), async(req, res) => {
   const { id } = req.params;
   const index = store.books.findIndex((el) => el.id === id);
   if (index !== -1 && req.file) {
@@ -113,9 +166,12 @@ router.post("/cover/:id", coverMulter.single("fileCover"), (req, res) => {
       ...store.books[index],
       fileCover: filename,
     };
+    const URL = `http://counter:4000/${id}`;
+    const obj = await httpGet(URL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],
+      count: obj.count
     });
   } else {
     res.render("./pages/404", {
@@ -139,7 +195,7 @@ router.get("/download/:id", (req, res) => {
   }
 });
 
-router.post("/update/:id", (req, res) => {
+router.post("/update/:id", async(req, res) => {
   const { id } = req.params;
   const index = store.books.findIndex((el) => el.id === id);
 
@@ -148,9 +204,12 @@ router.post("/update/:id", (req, res) => {
       ...store.books[index],
       ...req.body,
     };
+    const URL = `http://counter:4000/${id}`;
+    const obj = await httpGet(URL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],
+      count: obj.count
     });
   } else {
     res.render("./pages/404", {

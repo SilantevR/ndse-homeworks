@@ -6,7 +6,7 @@ COPY package.json package-lock.json /app/
 
 RUN npm install
 
-COPY ./src /app/
+COPY ./src /app/src/
 
 EXPOSE 3000
 
