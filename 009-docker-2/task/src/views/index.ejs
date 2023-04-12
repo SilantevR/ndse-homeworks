@@ -30,11 +30,9 @@
         </td>
         <td><%= el.favorite ? "✔" : "✖" %></td>
         <td>
-          <form action="/counter/<%= el.id %>/incr" method="POST" class="d-inline">
-            <button class="btn btn-sm btn-success">
-              <i class="fa fa-eye" aria-hidden="true"></i>
-            </button>
-          </form>
+          <a class="btn btn-sm btn-success" href="/<%= el.id %>">
+            <i class="fa fa-eye" aria-hidden="true"></i>
+          </a>
           <a class="btn btn-sm btn-primary" href="/update/<%= el.id %>">
             <i class="fa fa-pencil" aria-hidden="true"></i>
           </a>

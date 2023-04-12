@@ -6,6 +6,8 @@ const fileMulter = require("../middlewares/books");
 const coverMulter = require("../middlewares/covers");
 const router = express.Router();
 
+const URL = process.env.URL
+
 class Book {
   constructor(body) {
     this.id = body.id || uuid();
@@ -68,8 +70,29 @@ router.get("/add", (req, res) => {
 
 router.get("/:id", async(req, res) => {
   const { id } = req.params;
-  const URL = `http://counter:4000/${id}`;
-  let obj = await httpGet(URL)
+  const bookURL = URL + id;
+  const postOptions = {
+    hostname: 'counter',
+    port    : '4000',
+    path    : `/${id}`,
+    method  : 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+   },
+  };
+  
+  const postRequest = http.request(postOptions, (response) => {
+      response.setEncoding('utf8');
+  })
+
+  postRequest.on("error", (err) => {
+      console.log(err)
+  });
+   
+  postRequest.end();
+
+
+  let obj = await httpGet(bookURL)
   const { books } = store;
   const index = books.findIndex((el) => el.id === id);
   if (index !== -1) {
@@ -85,30 +108,12 @@ router.get("/:id", async(req, res) => {
   }
 });
 
-router.post("/counter/:id/incr", (req, res) => {
+/*router.post("/counter/:id/incr", (req, res) => {
   const { id } = req.params;
-  const postOptions = {
-    hostname: 'counter',
-    port    : '4000',
-    path    : `/${id}`,
-    method  : 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-   },
-};
   
-    const postRequest = http.request(postOptions, (response) => {
-      response.setEncoding('utf8');
-    })
-
-    postRequest.on("error", (err) => {
-      console.log(err)
-    });
-   
-    postRequest.end();
-    res.redirect(301, "http://localhost:3000" + `/${id}`);
+  res.redirect(301, "http://localhost:3000" + `/${id}`);
   
-});
+});*/
 
 router.post("/add", (req, res) => {
   const book = new Book(req.body);
@@ -143,8 +148,8 @@ router.post("/file/:id", fileMulter.single("fileBook"), async(req, res) => {
       ...store.books[index],
       fileName: filename,
     };
-    const URL = `http://counter:4000/${id}`;
-    const obj = await httpGet(URL)
+    const bookURL = URL + id;
+    const obj = await httpGet(bookURL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],
@@ -166,8 +171,8 @@ router.post("/cover/:id", coverMulter.single("fileCover"), async(req, res) => {
       ...store.books[index],
       fileCover: filename,
     };
-    const URL = `http://counter:4000/${id}`;
-    const obj = await httpGet(URL)
+    const bookURL = URL + id;
+    const obj = await httpGet(bookURL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],
@@ -204,8 +209,8 @@ router.post("/update/:id", async(req, res) => {
       ...store.books[index],
       ...req.body,
     };
-    const URL = `http://counter:4000/${id}`;
-    const obj = await httpGet(URL)
+    const bookURL = URL + id;
+    const obj = await httpGet(bookURL)
     res.render("./pages/view", {
       title: store.books[index].title,
       book: store.books[index],

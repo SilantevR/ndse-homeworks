@@ -9,6 +9,7 @@ services:
       - "3000:3000"
     environment:
       - PORT=3000
+      - URL=http://counter:4000/
     build:
         context: ./task
         dockerfile: Dockerfile
@@ -25,6 +26,7 @@ services:
       - "4000:4000"
     environment:
       - PORT=4000
+      
     build:
         context: ./counter
         dockerfile: Dockerfile
