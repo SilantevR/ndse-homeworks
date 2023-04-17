@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  library:
+    container_name: library
+    image: library
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - URL=http://counter:4000/
+      - SERVICE=counter
+      - MONGODB_URL=mongodb://root:example@mongo:27017/
+    build:
+      context: ./task
+      dockerfile: Dockerfile
+      args:
+        PORT: 3000
+    depends_on:
+      mongo:
+        condition: service_healthy
+      counter:
+        condition: service_healthy
+
+  counter:
+    container_name: counter
+    image: counter
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MONGODB_URL=mongodb://root:example@mongo:27017/
+    build:
+      context: ./counter
+      dockerfile: Dockerfile
+      args:
+        PORT: 4000
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: "exit 0"
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    healthcheck:
+      test: "exit 0"
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
