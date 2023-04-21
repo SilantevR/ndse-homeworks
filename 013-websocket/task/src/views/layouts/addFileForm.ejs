@@ -1,0 +1,15 @@
+<form action="/file/<%= book.id || `` %>" method="POST" enctype="multipart/form-data" class="mt-6">
+  <div class="form-group">
+    <label for="inputFileBook">Загрузите книгу</label>
+    <input
+      type="file"
+      value=""
+      name="fileBook"
+      class="form-control"
+      id="inputFileBook"
+    />
+    <div class="form-group text-right">
+      <button type="submit" class="btn btn-primary">Загрузить</button>
+    </div>
+
+</form>

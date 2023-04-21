@@ -1,0 +1,15 @@
+<form action="/cover/<%= book.id || `` %>" method="POST" enctype="multipart/form-data" class="mt-6">
+  <div class="form-group">
+    <label for="inputFileCover">Загрузите обложку</label>
+    <input
+      type="file"
+      value=""
+      name="fileCover"
+      class="form-control"
+      id="inputFileCover"
+    />
+    <div class="form-group text-right">
+      <button type="submit" class="btn btn-primary">Загрузить</button>
+    </div>
+
+</form>
